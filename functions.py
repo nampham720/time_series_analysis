@@ -158,14 +158,15 @@ def analyze_time_series(df, periods, add_or_mul, value_of_choice):
 
     # Define time period columns for grouping
     period_columns = {'perday': 'D', 'perweek': 'W', 'permonth': 'M'}
-    periods_list = list(periods.values())
-    
+    periods_time= list(periods.values())
+    periods_window = list(periods.keys())
 
     for i in range(len(periods)):
+        groupname = f'per_{periods_time[i] / 3600}hr'
         try:
             # Decompose the time series
             decomposition = seasonal_decompose(df[value_of_choice], 
-                                               model=add_or_mul[i], period=periods_list[i][0])
+                                               model=add_or_mul[i], period=periods_window[i])
         except:
             continue
         
@@ -194,18 +195,15 @@ def analyze_time_series(df, periods, add_or_mul, value_of_choice):
         # Mann-Kendall trend test
         trend_result = mk.original_test(decomposed_df['value'])
 
-        # Add grouping column for seasonality test
-        #if periods_name[i] in period_columns:
-        df[f'group_{periods_name[i]}'] = df.index.to_period(period_columns[periods_name[i]])
-        
         # Kruskal-Wallis test for seasonality
-        groups = [group[value_of_choice].values for _, group in df.groupby(f'group_{periods_name[i]}')]
-        _, seasonal_p_value = kruskal(*groups)
+        groups = [group.dropna() for _, group in seasonal.groupby(seasonal.index)]
+        # Perform Kruskal-Wallis test
+        stat, p_value = kruskal(*groups)
         significant_seasonal = seasonal_p_value < 0.05
         
         # Create a new row for this period
         new_row = pd.DataFrame([{
-            'period_name': periods_name[i],
+            'period_name': groupname,
             'trend_var': trend_variance,
             'seasonal_var': seasonal_variance,
             'residual_var': residual_variance,
