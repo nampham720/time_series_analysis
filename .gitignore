@@ -1,0 +1,23 @@
+# This file is used to ignore files and directories from Git.
+# Any line that starts with a # is a comment.
+# Any line that starts with a * is a wildcard.
+# Any line that starts with ! is a negation of a rule.
+
+# Ignore all pycache files.
+pycache/
+__pycache__/
+*pycache
+*__pycache__
+
+# Ignore all ipynb_checkpoints files.
+ipynb_checkpoints/
+*ipynb_checkpoints
+*ipynb_checkpoint
+
+# Other temporary files
+*.swp
+*~
+*.bak
+*.tmp
+*.zip
+*.DS_Store
