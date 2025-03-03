@@ -1,0 +1,9 @@
+[
+    {
+        "model": "gru",
+        "hidden_dim": 10,
+        "num_layers": 2,
+        "discriminative_score": 0.1,
+        "predictive_score": 21.6757
+    }
+]

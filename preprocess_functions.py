@@ -78,7 +78,7 @@ def process_time_series(PATH, error_file):
     most_frequent_diff = time_diff_counts.idxmax()
     
     # Convert time_diff to a frequency string
-    freq_str = f'{most_frequent_diff}s'
+    freq_str = f'{int(most_frequent_diff)}s'
 
     
     # Get first and last timestamps

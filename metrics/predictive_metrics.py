@@ -1,29 +1,11 @@
-"""Time-series Generative Adversarial Networks (TimeGAN) Codebase.
-
-Reference: Jinsung Yoon, Daniel Jarrett, Mihaela van der Schaar, 
-"Time-series Generative Adversarial Networks," 
-Neural Information Processing Systems (NeurIPS), 2019.
-
-Paper link: https://papers.nips.cc/paper/8789-time-series-generative-adversarial-networks
-
-Last updated Date: April 24th 2020
-Code author: Jinsung Yoon (jsyoon0823@gmail.com)
-
------------------------------
-
-predictive_metrics.py
-
-Note: Use Post-hoc RNN to predict one-step ahead (last feature)
-"""
-
-# Necessary Packages
 import tensorflow as tf
 import numpy as np
 from sklearn.metrics import mean_absolute_error
 from utils import extract_time
+from tensorflow.keras.callbacks import EarlyStopping
 
  
-def predictive_score_metrics(ori_data, generated_data):
+def t_predictive_score_metrics(ori_data, generated_data):
     """Evaluate Post-hoc RNN one-step-ahead prediction.
     
     Args:
@@ -48,20 +30,26 @@ def predictive_score_metrics(ori_data, generated_data):
 
     # Model parameters
     hidden_dim = max(1, int(dim / 2))
-    epochs = 50  # Reduced iterations for TF2 efficiency
+    epochs = 50 #50  # Reduced iterations for TF2 efficiency
     batch_size = 128
 
     # Data preparation function
     def prepare_data(data, time):
         """Prepares input-output pairs for the predictor."""
-        X = np.array([d[:-1, :-1] for d in data])
+        #X = np.array([d[:-1, :-1] for d in data])
+        X = np.array([d[:-1, -1:] for d in data]) # keep only the last column
         T = np.array([t - 1 for t in time])
-        Y = np.array([np.reshape(d[1:, -1], (-1, 1)) for d in data])
+        #Y = np.array([np.reshape(d[1:, -1], (-1, 1)) for d in data])
+        Y = np.array([d[1:, -1:] for d in data])  # Ensure Y aligns with X
+        #print(f"X shape: {X.shape}")  # Should be (num_samples, seq_len, 1)
+        #print(f"Y shape: {Y.shape}")  # Should be (num_samples, seq_len, 1)
+
+
         return X, T, Y
 
     # Prepare training data
     train_X, train_T, train_Y = prepare_data(generated_data, generated_time)
-
+    
     # Define the Predictor model using Keras API
     class Predictor(tf.keras.Model):
         def __init__(self, hidden_dim):
@@ -78,14 +66,20 @@ def predictive_score_metrics(ori_data, generated_data):
 
     # Loss and Optimizer
     loss_fn = tf.keras.losses.MeanAbsoluteError()
-    optimizer = tf.keras.optimizers.Adam()
+    optimizer = tf.keras.optimizers.Adam(clipvalue=1.0)
 
     # Convert dataset into TensorFlow dataset API for efficiency
     train_dataset = tf.data.Dataset.from_tensor_slices((train_X, train_Y))
-    train_dataset = train_dataset.shuffle(len(train_X)).batch(batch_size)
+    #train_dataset = train_dataset.shuffle(len(train_X)).batch(batch_size)
+    train_dataset = train_dataset.shuffle(len(train_X)).batch(batch_size, drop_remainder=True)
+
+    # Early stopping setup
+    early_stopping = EarlyStopping(monitor='loss', patience=10, restore_best_weights=True)
 
     # Training loop using GradientTape
     for epoch in range(epochs):
+        if epoch % 50 == 0:
+            print('Epoch: ', epoch)
         for X_batch, Y_batch in train_dataset:
             with tf.GradientTape() as tape:
                 Y_pred = predictor(X_batch)
@@ -93,6 +87,11 @@ def predictive_score_metrics(ori_data, generated_data):
 
             grads = tape.gradient(loss, predictor.trainable_variables)
             optimizer.apply_gradients(zip(grads, predictor.trainable_variables))
+        
+        # Early stopping check
+        if early_stopping.stopped_epoch > 0:
+            print(f"Early stopping triggered at epoch {early_stopping.stopped_epoch}")
+            break
 
     # Prepare test data (on original dataset)
     test_X, test_T, test_Y = prepare_data(ori_data, ori_time)

@@ -1,4 +1,5 @@
-# time_series_analysis
+# Outlier detection using ARIMA, TimeGAN, ECOD
+## on-going, finalising, thesis project
 
 Important file: 
 

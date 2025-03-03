@@ -1,0 +1,44 @@
+[
+    {
+        "model": "gru",
+        "hidden_dim": 10,
+        "num_layers": 2,
+        "discriminative_score": 0.0655,
+        "predictive_score": 13.0717
+    },
+    {
+        "model": "gru",
+        "hidden_dim": 10,
+        "num_layers": 3,
+        "discriminative_score": 0.0641,
+        "predictive_score": 13.0661
+    },
+    {
+        "model": "gru",
+        "hidden_dim": 10,
+        "num_layers": 5,
+        "discriminative_score": 0.0718,
+        "predictive_score": 13.0314
+    },
+    {
+        "model": "gru",
+        "hidden_dim": 20,
+        "num_layers": 2,
+        "discriminative_score": 0.1417,
+        "predictive_score": 13.0568
+    },
+    {
+        "model": "gru",
+        "hidden_dim": 20,
+        "num_layers": 3,
+        "discriminative_score": 0.0578,
+        "predictive_score": 13.111
+    },
+    {
+        "model": "gru",
+        "hidden_dim": 20,
+        "num_layers": 5,
+        "discriminative_score": 0.0055,
+        "predictive_score": 13.0531
+    }
+]

@@ -37,7 +37,7 @@ def categorize_anomalies(data, window_size=288, filename='unknown', z_thresh=2, 
                               .fillna(False))  # Fill NaNs with False
 
     # **Collective Anomalies using Batch-Based Euclidean Distance**
-    data['anomaly_type'] = 'Normal'  # Default to Normal for all rows
+    data['is_collective'] = 'Normal'  # Default to Normal for all rows
     scaler = MinMaxScaler()  # Scale values between 0 and 1
     data['value_normalized'] = scaler.fit_transform(data[['value']])
 
@@ -79,7 +79,7 @@ def categorize_anomalies(data, window_size=288, filename='unknown', z_thresh=2, 
             similarity_thresh = np.mean(similarities) if similarities else 0  
             
         if len(similarities) > 0 and batch_distance > similarity_thresh:
-            data.loc[start_idx:start_idx + window_size - 1, 'anomaly_type'] = 'Collective'
+            data.loc[start_idx:start_idx + window_size - 1, 'is_collective'] = 'Collective'
         
         # Mark batches containing actual outliers
         if any(batch_data['outlier'] == 1):
@@ -93,9 +93,11 @@ def categorize_anomalies(data, window_size=288, filename='unknown', z_thresh=2, 
                 return 'Point'
             elif row['is_contextual']:
                 return 'Contextual'
+            elif row['is_collective'] == 'Collective':
+                return 'Collective'
             else:
                 return 'Unknown'
-        return row['anomaly_type']
+        return 'Normal'
 
     data['anomaly_type'] = data.apply(classify, axis=1)
 
