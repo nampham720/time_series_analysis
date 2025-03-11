@@ -1,0 +1,23 @@
+digraph {
+	size=10
+	Start [label=Start fillcolor=lightblue shape=oval style=filled]
+	CheckStat [label="Check Stationarity?" fillcolor=lightgray shape=diamond style=filled]
+	NoTrans [label="Apply ARIMA (No Seasonality)" fillcolor=lightgreen shape=rectangle style=filled]
+	BoxCox [label="Apply Box-Cox Transformation" fillcolor=lightcoral shape=rectangle style=filled]
+	ReRun [label="Re-run Stationarity Test" fillcolor=lightgoldenrodyellow shape=rectangle style=filled]
+	CheckSeason [label="Check Seasonality" fillcolor=lightgray shape=diamond style=filled]
+	ARIMA_No_Seas [label="ARIMA Model (No Seasonality)" fillcolor=lightgreen shape=rectangle style=filled]
+	ARIMA_Seas [label="ARIMA Model (With Seasonality)" fillcolor=lightgreen shape=rectangle style=filled]
+	Output [label="Output Best Model Orders" fillcolor=lightblue shape=oval style=filled]
+	Start -> CheckStat
+	CheckStat -> NoTrans [label=Yes]
+	CheckStat -> BoxCox [label=No]
+	BoxCox -> ReRun
+	ReRun -> CheckStat
+	NoTrans -> Output
+	CheckStat -> CheckSeason [label=Yes]
+	CheckSeason -> ARIMA_No_Seas [label=No]
+	CheckSeason -> ARIMA_Seas [label=Yes]
+	ARIMA_No_Seas -> Output
+	ARIMA_Seas -> Output
+}

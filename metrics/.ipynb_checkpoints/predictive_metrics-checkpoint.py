@@ -48,20 +48,24 @@ def predictive_score_metrics(ori_data, generated_data):
 
     # Model parameters
     hidden_dim = max(1, int(dim / 2))
-    epochs = 50  # Reduced iterations for TF2 efficiency
+    epochs = 50 #50  # Reduced iterations for TF2 efficiency
     batch_size = 128
 
     # Data preparation function
     def prepare_data(data, time):
         """Prepares input-output pairs for the predictor."""
-        X = np.array([d[:-1, :-1] for d in data])
+        #X = np.array([d[:-1, :-1] for d in data])
+        X = np.array([d[:-1, 1:] for d in data])  # Keep value column, remove timestamps only
         T = np.array([t - 1 for t in time])
-        Y = np.array([np.reshape(d[1:, -1], (-1, 1)) for d in data])
+        #Y = np.array([np.reshape(d[1:, -1], (-1, 1)) for d in data])
+        Y = np.array([d[1:, 1:] for d in data])  # Ensure Y is aligned with X
+        
+
         return X, T, Y
 
     # Prepare training data
     train_X, train_T, train_Y = prepare_data(generated_data, generated_time)
-
+    print('DONE PREPARE_DATA')
     # Define the Predictor model using Keras API
     class Predictor(tf.keras.Model):
         def __init__(self, hidden_dim):
@@ -82,11 +86,15 @@ def predictive_score_metrics(ori_data, generated_data):
 
     # Convert dataset into TensorFlow dataset API for efficiency
     train_dataset = tf.data.Dataset.from_tensor_slices((train_X, train_Y))
-    train_dataset = train_dataset.shuffle(len(train_X)).batch(batch_size)
+    #train_dataset = train_dataset.shuffle(len(train_X)).batch(batch_size)
+    train_dataset = train_dataset.shuffle(len(train_X)).batch(batch_size, drop_remainder=True)
 
     # Training loop using GradientTape
     for epoch in range(epochs):
+        if epoch % 50 == 0:
+            print('Epoch: ', epoch)
         for X_batch, Y_batch in train_dataset:
+            print(X_batch.shape())
             with tf.GradientTape() as tape:
                 Y_pred = predictor(X_batch)
                 loss = loss_fn(Y_batch, Y_pred)

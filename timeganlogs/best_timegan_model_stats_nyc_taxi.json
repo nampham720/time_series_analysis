@@ -1,0 +1,1 @@
+{"best_params": {"hidden_dim": 50, "num_layer": 2, "batch_size": 96, "module": "gru"}}

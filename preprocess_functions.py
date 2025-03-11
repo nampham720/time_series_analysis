@@ -78,7 +78,7 @@ def process_time_series(PATH, error_file):
     most_frequent_diff = time_diff_counts.idxmax()
     
     # Convert time_diff to a frequency string
-    freq_str = f'{int(most_frequent_diff)}s'
+    freq_str = f'{most_frequent_diff}s'
 
     
     # Get first and last timestamps
@@ -132,8 +132,14 @@ def process_time_series(PATH, error_file):
 
 def window_sizes_freq(time_diff):
     window_sizes = dict()
+    
+    if time_diff <= 300: 
+        window_sizes['first'] = int(60*60 / time_diff)
+    elif time_diff <= 1800:
+        window_sizes['first'] = int(60*60*3 / time_diff)
+    else:
+        window_sizes['first'] = int(60*60*6 / time_diff)
     window_sizes['daily'] = int(60*60*24 / time_diff)
-    window_sizes['time_of_day'] = int(window_sizes['daily'] / 4)
     return window_sizes 
 
 

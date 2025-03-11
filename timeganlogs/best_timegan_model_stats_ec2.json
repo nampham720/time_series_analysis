@@ -1,0 +1,1 @@
+{"best_params": {"hidden_dim": 30, "num_layer": 2, "batch_size": 64, "module": "lstm"}}

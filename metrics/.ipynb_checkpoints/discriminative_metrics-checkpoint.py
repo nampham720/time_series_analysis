@@ -46,8 +46,8 @@ def discriminative_score_metrics (ori_data, generated_data):
     
     # Network parameters
     hidden_dim = max(1, int(dim / 2))
-    iterations = 2000 #test 500 # default = 2000
-    batch_size = 128
+    iterations = 200 #test 500 # default = 2000
+    batch_size = 64
     
     # Define the Discriminator model
     class Discriminator(tf.keras.Model):
@@ -87,7 +87,7 @@ def discriminative_score_metrics (ori_data, generated_data):
         grads = tape.gradient(d_loss, discriminator.trainable_variables)
         optimizer.apply_gradients(zip(grads, discriminator.trainable_variables))
     
-        if epoch % 500 == 0:
+        if epoch % 200 == 0:
             print(f"Epoch {epoch}, D_loss: {d_loss.numpy():.4f}")
     
     # Test performance on the testing set

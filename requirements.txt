@@ -1,3 +1,0 @@
-tensorflow==2.18
-pymannkendall
-statsmodels
